@@ -1,0 +1,281 @@
+index.html
+
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(DressFormApp());
+}
+
+class DressFormApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: '3D Dress Form',
+      theme: ThemeData(primarySwatch: Colors.pink),
+      home: HomeScreen(),
+    );
+  }
+}
+
+////////////////////////////////////////////////////
+/// HOME SCREEN
+////////////////////////////////////////////////////
+
+class HomeScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('Dress Form App')),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+
+            ElevatedButton(
+              child: Text("Start Designing"),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => BodyAdjustScreen()),
+                );
+              },
+            ),
+
+            SizedBox(height:20),
+
+            ElevatedButton(
+              child: Text("Exit"),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+////////////////////////////////////////////////////
+/// BODY ADJUSTMENT SCREEN
+////////////////////////////////////////////////////
+
+class BodyAdjustScreen extends StatefulWidget {
+  @override
+  _BodyAdjustScreenState createState() => _BodyAdjustScreenState();
+}
+
+class _BodyAdjustScreenState extends State<BodyAdjustScreen> {
+
+  double bust = 36;
+  double waist = 28;
+  double hips = 38;
+  double shoulder = 15;
+  double height = 65;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text("Adjust Dress Form")),
+      body: Column(
+        children: [
+
+          ////////////////////////////////////////////////////
+          /// MANNEQUIN PLACEHOLDER
+          ////////////////////////////////////////////////////
+
+          Expanded(
+            child: Center(
+              child: Container(
+                width: 150,
+                height: 300,
+                decoration: BoxDecoration(
+                  color: Colors.pink[100],
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Center(
+                  child: Text(
+                    "Female\nMannequin",
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
+            ),
+          ),
+
+          ////////////////////////////////////////////////////
+          /// MEASUREMENT SLIDERS
+          ////////////////////////////////////////////////////
+
+          buildSlider("Bust", bust, 30, 60, (v){setState(()=>bust=v);}),
+
+          buildSlider("Waist", waist, 20, 50, (v){setState(()=>waist=v);}),
+
+          buildSlider("Hips", hips, 30, 70, (v){setState(()=>hips=v);}),
+
+          buildSlider("Shoulder", shoulder, 12, 25, (v){setState(()=>shoulder=v);}),
+
+          buildSlider("Height", height, 55, 75, (v){setState(()=>height=v);}),
+
+          ////////////////////////////////////////////////////
+          /// NAVIGATION BUTTONS
+          ////////////////////////////////////////////////////
+
+          Padding(
+            padding: const EdgeInsets.all(12),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+
+                ElevatedButton(
+                  child: Text("Back"),
+                  onPressed: (){
+                    Navigator.pop(context);
+                  },
+                ),
+
+                ElevatedButton(
+                  child: Text("Next"),
+                  onPressed: (){
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => PatternScreen(
+                          bust: bust,
+                          waist: waist,
+                          hips: hips,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+
+              ],
+            ),
+          )
+
+        ],
+      ),
+    );
+  }
+
+////////////////////////////////////////////////////
+/// SLIDER WIDGET
+////////////////////////////////////////////////////
+
+Widget buildSlider(String label,double value,double min,double max,Function(double) onChanged){
+
+  return Column(
+    children: [
+
+      Text("$label : ${value.toStringAsFixed(1)}"),
+
+      Slider(
+        value: value,
+        min: min,
+        max: max,
+        onChanged: onChanged,
+      ),
+
+    ],
+  );
+}
+
+}
+
+////////////////////////////////////////////////////
+/// PATTERN SCREEN
+////////////////////////////////////////////////////
+
+class PatternScreen extends StatelessWidget {
+
+  final double bust;
+  final double waist;
+  final double hips;
+
+  PatternScreen({required this.bust, required this.waist, required this.hips});
+
+  @override
+  Widget build(BuildContext context) {
+
+    return Scaffold(
+      appBar: AppBar(title: Text("Pattern Draft")),
+      body: Column(
+        children: [
+
+          Expanded(
+            child: CustomPaint(
+              painter: PatternPainter(bust,waist,hips),
+              child: Container(),
+            ),
+          ),
+
+          Padding(
+            padding: const EdgeInsets.all(12),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+
+                ElevatedButton(
+                  child: Text("Back"),
+                  onPressed: (){
+                    Navigator.pop(context);
+                  },
+                ),
+
+                ElevatedButton(
+                  child: Text("Exit"),
+                  onPressed: (){
+                    Navigator.popUntil(context,(route)=>route.isFirst);
+                  },
+                ),
+
+              ],
+            ),
+          )
+
+        ],
+      ),
+    );
+  }
+}
+
+////////////////////////////////////////////////////
+/// PATTERN PAINTER
+////////////////////////////////////////////////////
+
+class PatternPainter extends CustomPainter {
+
+  final double bust;
+  final double waist;
+  final double hips;
+
+  PatternPainter(this.bust,this.waist,this.hips);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+
+    Paint line = Paint()
+      ..color = Colors.black
+      ..strokeWidth = 2
+      ..style = PaintingStyle.stroke;
+
+    double width = bust * 2;
+    double height = 300;
+
+    Rect bodice = Rect.fromLTWH(50, 50, width, height);
+
+    canvas.drawRect(bodice,line);
+
+    /// waist line
+    canvas.drawLine(
+      Offset(50,200),
+      Offset(50+width,200),
+      line,
+    );
+
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate)=>true;
+}
